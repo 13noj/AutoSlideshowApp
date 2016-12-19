@@ -67,11 +67,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        Button buttonPlayStop = (Button) findViewById(R.id.buttonPlayStop);
+        Button buttonForward = (Button) findViewById(R.id.buttonForward);
+        Button buttonBackward = (Button) findViewById(R.id.buttonBackward);
         switch (requestCode) {
             case PERMISSIONS_REQUEST_CODE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getContentsInfo();
                 }
+                else{
+                    buttonPlayStop.setEnabled(false);
+                    buttonForward.setEnabled(false);
+                    buttonBackward.setEnabled(false);
+                }
+
                 break;
             default:
                 break;
@@ -80,6 +89,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // 画像の情報を取得する
     private void getContentsInfo() {
+        Button buttonPlayStop = (Button) findViewById(R.id.buttonPlayStop);
+        Button buttonForward = (Button) findViewById(R.id.buttonForward);
+        Button buttonBackward = (Button) findViewById(R.id.buttonBackward);
+
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, // データの種類
@@ -104,6 +117,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }while (cursor.moveToNext());
         cursor.close();
        // Log.d("logtest", "while の後のリストのサイズ" + this.imageUriList.size()+"");
+
+        if (imageUriList.size() == 0) {
+            buttonPlayStop.setEnabled(false);
+            buttonForward.setEnabled(false);
+            buttonBackward.setEnabled(false);
+        }
     }
 
     //画像のリスト
@@ -133,13 +152,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 if ( showIndex >= imageUriList.size() ) {
                                     showIndex = 0;
                                 }
-                                Log.d("logtest", "run行きました2。"+ imageUriList.size() + "インデックスは" + showIndex);
+                                //Log.d("logtest", "run行きました2。"+ imageUriList.size() + "インデックスは" + showIndex);
                                 ImageView imageView = (ImageView) findViewById(R.id.imageView);
-                                Log.d("logtest", "run行きました3。"+ imageUriList.size() + "インデックスは" + showIndex);
+                                //Log.d("logtest", "run行きました3。"+ imageUriList.size() + "インデックスは" + showIndex);
                                 imageView.setImageURI(imageUriList.get(showIndex));
-                                Log.d("logtest", "run行きました4。"+ imageUriList.size() + "インデックスは" + showIndex);
+                                //Log.d("logtest", "run行きました4。"+ imageUriList.size() + "インデックスは" + showIndex);
 
-                            Log.d("logtest", "写真の表示"); // ここで写真を表示する。
+                            //Log.d("logtest", "写真の表示"); // ここで写真を表示する。
                         }
                     };
                     handler.post(runnable);
@@ -159,28 +178,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    //setEnabled()
     public void onClick(View v) {
+        Button buttonPlayStop = (Button) findViewById(R.id.buttonPlayStop);
         Button buttonForward = (Button) findViewById(R.id.buttonForward);
         Button buttonBackward = (Button) findViewById(R.id.buttonBackward);
 
-        if (v.getId() == R.id.buttonPlayStop) {
-            if (timer == null) {
-                startTimer();
-                buttonForward.setEnabled(false);
-                buttonBackward.setEnabled(false);
+            if (v.getId() == R.id.buttonPlayStop) {
+                if (timer == null) {
+                    startTimer();
+                    buttonPlayStop.setText("停止");
+                    buttonForward.setEnabled(false);
+                    buttonBackward.setEnabled(false);
+                } else if (timer != null) {
+                    stopTimer();
+                    buttonPlayStop.setText("再生");
+                    buttonForward.setEnabled(true);
+                    buttonBackward.setEnabled(true);
+                }
             }
-            else if (timer != null) {
-                stopTimer();
-                buttonForward.setEnabled(true);
-                buttonBackward.setEnabled(true);
-            }
-        }
 
 
 // 進むボタン
 
-        if (v.getId() == R.id.buttonForward) {
+            if (v.getId() == R.id.buttonForward) {
 
                 showIndex++;
                 if (showIndex >= this.imageUriList.size()) {
@@ -189,21 +209,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ImageView imageView = (ImageView) findViewById(R.id.imageView);
                 imageView.setImageURI(this.imageUriList.get(showIndex));
 
-        }
+            }
 
-        if (v.getId() == R.id.buttonBackward) { // 戻るボタン
-            showIndex--;
-            if ( showIndex <=  0 ) {
-                showIndex = this.imageUriList.size() - 1;
-             }
-            ImageView imageView = (ImageView) findViewById(R.id.imageView);
-            imageView.setImageURI( this.imageUriList.get(showIndex) );
-        }
+            if (v.getId() == R.id.buttonBackward) { // 戻るボタン
+                showIndex--;
+                if (showIndex <= 0) {
+                    showIndex = this.imageUriList.size() - 1;
+                }
+                ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                imageView.setImageURI(this.imageUriList.get(showIndex));
+            }
 
 
 
     }
-
 
 }
 
